@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+
+  app:
+    depends_on:
+      - db
+    build:
+      context: .
+      dockerfile: deploy/app/Dockerfile
+    volumes:
+      - ./app:/app
+    ports:
+      - "9090:9090"
+    environment:
+      - PYTHONUNBUFFERED=1
+    command: python app.py
+
+  db:
+    image: mysql:5.7
+    ports:
+     - '3306:3306'
+    command: --init-file /deploy/db/init.sql
+    volumes:
+        - ./deploy/db/init.sql:/deploy/db/init.sql
+    environment:
+      MYSQL_ROOT_PASSWORD: football
+
+  phpmyadmin:
+    depends_on:
+      - db
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - '6030:80'
+    environment:
+      PMA_HOST: db
